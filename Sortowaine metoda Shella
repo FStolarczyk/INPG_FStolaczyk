@@ -1,0 +1,70 @@
+// Sortowanie metodą Shella
+//--------------------------------------------------------
+// (C)2012 mgr Jerzy Wałaszek
+// I Liceum Ogólnokształcące
+// im. K. Brodzińskiego
+// w Tarnowie
+//--------------------------------------------------------
+
+#include <cmath>
+#include <iostream>
+#include <iomanip>
+#include <cstdlib>
+#include <time.h>
+
+using namespace std;
+
+const int N = 20; // Liczebność zbioru.
+
+// Program główny
+//---------------
+
+int main()
+{
+  int d[N],h,i,j,x;
+  
+  cout << " Sortowanie metoda Shella\n"
+          "--------------------------\n"
+          "  (C)2005 Jerzy Walaszek\n\n"
+          "Przed sortowaniem:\n\n";
+
+// Najpierw wypełniamy tablicę d[] liczbami pseudolosowymi
+// a następnie wyświetlamy jej zawartość
+
+  srand((unsigned)time(NULL));
+
+  for(i = 0; i < N; i++) d[i] = rand() % 100;
+  for(i = 0; i < N; i++) cout << setw(4) << d[i];
+  cout << endl;
+
+// Wyznaczamy wartość początkowego przesunięcia
+
+  for(h = 1; h < N; h = 3 * h + 1);
+  h /= 9;
+  if(!h) h++; // istotne dla małych N, dla większych można pominąć!
+
+// Sortujemy
+
+  while(h)
+  {
+    for(j = N - h - 1; j >= 0; j--)
+    {
+      x = d[j];
+      i = j + h;
+      while((i < N) && (x > d[i]))
+      {
+        d[i - h] = d[i];
+        i += h;
+      }
+      d[i - h] = x;
+    }
+    h /= 3;
+  }
+
+// Wyświetlamy wynik sortowania
+
+  cout << "Po sortowaniu:\n\n";
+  for(i = 0; i < N; i++) cout << setw(4) << d[i];
+  cout << endl;
+  return 0;
+} 
