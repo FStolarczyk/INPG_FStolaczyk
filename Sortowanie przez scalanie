@@ -1,4 +1,6 @@
+
 // Sortowanie przez scalanie (mergesort)  //zmiana_master
+
 // Koszt algorytmu w każdym przypadku:
 // T(n)=n log n
 // Marcin Krajewski
