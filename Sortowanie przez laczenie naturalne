@@ -1,0 +1,153 @@
+//sortowanie przez laczenie naturalne
+//www.algorytm.org
+//(c)2005 Karol Kokoszka
+ 
+program sortowanieZ;
+uses crt;
+type tape_ = record
+tape     : file of byte;
+bufor    : byte;
+endOfFile: boolean;
+end;
+var  T: array[0..2] of tape_;
+ 
+ 
+{////////////////////////////////////////////////////////////////
+//////////////////// operacje na plikach //////////////////////}
+procedure assign_(var x: tape_; s: string);
+begin
+assign(x.tape, s);
+end;
+ 
+procedure reset_(var x: tape_);
+begin
+reset(x.tape);
+if eof(x.tape) then x.endOfFile:=true
+else begin
+read(x.tape, x.bufor);
+x.endOfFile:=false;
+end;
+end;
+ 
+procedure close_(var x: tape_);
+begin
+close(x.tape);
+end;
+ 
+function eof_(var x: tape_): boolean;
+begin
+eof_:=x.endOfFile;
+end;
+ 
+function getBuffer(var x: tape_): byte;
+begin
+getBuffer:=x.bufor;
+end;
+ 
+procedure read_(var x: tape_; var y: byte);
+begin
+y:=x.bufor;
+if eof(x.tape) then begin
+x.endOfFile:=true
+end
+else begin
+read(x.tape, x.bufor);
+x.endOfFile:=false;
+end;
+end;
+{/////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////}
+ 
+procedure divFiles(var f1, f2, f3: tape_);
+var  tmp: byte;
+inWhile: boolean;
+actFile: ^tape_;
+begin
+reset_(f1);
+rewrite(f2.tape); rewrite(f3.tape);
+actFile:=@f2;
+while not eof_(f1) do begin
+read_(f1, tmp);
+inWhile:=false;
+while not eof_(f1) and (getBuffer(f1)>=tmp) do begin
+write(actFile^.tape, tmp);
+read_(f1, tmp);
+end;
+write(actFile^.tape, tmp);
+if actFile=@f2 then actFile:=@f3 else actFile:=@f2;
+end;
+close_(f1);
+close(f2.tape); close(f3.tape);
+end;
+ 
+procedure intBlocks(var f1, f2, f3: tape_);
+var  tmp2, tmp3: byte;
+end2, end3: boolean;
+begin
+end2:=eof_(f2);
+end3:=eof_(f3);
+while (not eof_(f2)) and (not eof_(f3)) and (not end2) and (not end3) do begin
+if getBuffer(f2)<getBuffer(f3) then begin
+read_(f2, tmp2);
+write(f1.tape, tmp2);
+end2:=(getBuffer(f2)<tmp2) or eof_(f2);
+end else begin
+read_(f3, tmp3);
+write(f1.tape, tmp3);
+end3:=(getBuffer(f3)<tmp3) or eof_(f3);
+end;
+end;
+while not end2 do begin
+read_(f2, tmp2);
+write(f1.tape, tmp2);
+end2:=(getBuffer(f2)<tmp2) or eof_(f2);
+end;
+while not end3 do begin
+read_(f3, tmp3);
+write(f1.tape, tmp3);
+end3:=(getBuffer(f3)<tmp3) or eof_(f3);
+end;
+end;
+ 
+function mergeFiles(var f1, f2, f3: tape_): boolean;
+var  j: byte;
+begin
+reset_(f2); reset_(f3);
+rewrite(f1.tape);
+j:=0;
+while (not eof_(f2)) or (not eof_(f3)) do begin
+if j<2 then inc(j);
+intBlocks(f1, f2, f3);
+end;
+close_(f2); close_(f3);
+close(f1.tape);
+if j<=1 then mergeFiles:=true else mergeFiles:=false;
+end;
+ 
+procedure printFile(var f: tape_);
+var tmp: byte;
+begin
+reset_(f);
+while not eof_(f) do begin
+read_(f, tmp);
+write(tmp, ' ');
+end;
+close_(f);
+writeln;
+end;
+ 
+ 
+ 
+begin
+if ParamCount<2 then begin
+writeln('Nie podano nazwy pliku do sortowania ani partycji na pliki tymczasowe....');
+writeln('Przyklad: nSort c:\windows\win.com d:\');
+end else begin
+assign_(T[0], ParamStr(1));
+assign_(T[1], ParamStr(2) + 'file.000');
+assign_(T[2], ParamStr(2) + 'file.001');
+repeat
+divFiles(T[0], T[1], T[2]);
+until mergeFiles(T[0], T[1], T[2]);
+end;
+end.
