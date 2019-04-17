@@ -1,4 +1,4 @@
-// sortowanie przez zliczanie (countingsort)
+// sortowanie przez zliczanie (countingsort)  //zmiana_master
 // www.algorytm.org
  
 #include<iostream>
